@@ -2,17 +2,12 @@ const express = require('express')
 const app = express()
 const cors = require('cors');
 require('dotenv').config();
-const admin = require("firebase-admin");
 const { MongoClient } = require('mongodb');
 
 
 const port = process.env.PORT || 5000;
 
 
-const serviceAccount = require('./doctor-portal-91935-firebase-adminsdk-y0099-50cf521ad9.json');
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
 
 
 
@@ -71,16 +66,7 @@ try {
             console.log('the result' , result);
         });
 
-        app.get('/users/:email', async(req , res) => {
-            const email =  req.params.email;
-            const query ={email: email}
-            const user = await usersCollection.findOne(query);
-            let isAdmin = false;
-            if(user?.role ==='admin'){
-                    isAdmin = true;
-            }
-            res.json({admin : isAdmin})
-        })
+       
         // user put
         app.put('/users', async (req , res) => {
             const user =req.body;  
@@ -92,9 +78,8 @@ try {
 
     });
 //make admin
-    app.put('/users/admin' , verifyToken, async (req ,res) => {
-        const  user = req.body;
-        console.log('put' , req?.decodedEmail);
+    app.put('/users/admin',  async (req ,res) => {
+        const  user = req.body; 
         const filter  = {email: user.email};
         const updateDoc = {$set: {role: 'admin'}}
         const result = await usersCollection.updateOne(filter, updateDoc);
